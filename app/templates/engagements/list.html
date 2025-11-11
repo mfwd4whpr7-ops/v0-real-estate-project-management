@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Engagements - ProBuild{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">Engagements & Contrats</h1>
+            <p class="text-slate-600 mt-2">Suivi des contrats et engagements</p>
+        </div>
+        <a href="{{ url_for('engagements.add_engagement') }}" class="mt-4 md:mt-0 btn-primary inline-flex items-center justify-center">
+            <i class="fas fa-plus mr-2"></i>Nouveau contrat
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm">Contrats Actifs</p>
+            <p class="text-3xl font-bold text-slate-900 mt-2">{{ active_count|default('12') }}</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm">Total Engagé</p>
+            <p class="text-3xl font-bold text-slate-900 mt-2">{{ total_engaged|default('52 000') }} €</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm">En Attente</p>
+            <p class="text-3xl font-bold text-amber-600 mt-2">{{ pending_count|default('3') }}</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm">En Retard</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">{{ overdue_count|default('1') }}</p>
+        </div>
+    </div>
+
+    <!-- Engagements Table -->
+    <div class="card overflow-hidden">
+        <div class="p-6 border-b border-slate-200">
+            <h2 class="text-lg font-semibold text-slate-900">Liste des engagements</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Contrat</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Fournisseur</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Montant</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Date Début</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Statut</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Paiement</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for engagement in engagements %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-6 text-sm font-medium text-slate-900">{{ engagement.name }}</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ engagement.supplier }}</td>
+                        <td class="py-3 px-6 text-sm font-medium text-slate-900">{{ engagement.amount|default(0) }} €</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ engagement.start_date }}</td>
+                        <td class="py-3 px-6">
+                            {% if engagement.status == 'active' %}
+                            <span class="badge-success">Actif</span>
+                            {% elif engagement.status == 'pending' %}
+                            <span class="badge-warning">En attente</span>
+                            {% else %}
+                            <span class="badge-info">Terminé</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-6">
+                            <div class="w-16 bg-slate-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ engagement.payment_progress|default(0) }}%"></div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-6 text-sm">
+                            <button class="text-orange-600 hover:text-orange-700">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

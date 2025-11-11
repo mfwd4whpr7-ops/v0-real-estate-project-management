@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "components/form-field.html" import form_field %}
+
+{% block title %}{% if form.id.data %}Éditer{% else %}Créer{% endif %} un engagement - ProBuild{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900">
+            {% if form.id.data %}Éditer l'engagement{% else %}Créer un nouvel engagement{% endif %}
+        </h1>
+        <p class="text-slate-600 mt-2">Gestion des contrats et engagements</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="card p-8">
+        {{ form.csrf_token }}
+        
+        <!-- Informations générales -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Informations générales</h2>
+            
+            {{ form_field(form.project_id, label="Projet", required=true) }}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{ form_field(form.name, label="Nom du contrat", placeholder="Ex: Gros œuvre", required=true) }}
+                {{ form_field(form.supplier, label="Fournisseur/Prestataire", placeholder="Entreprise XYZ", required=true) }}
+            </div>
+            
+            {{ form_field(form.description, label="Description", type="textarea", help_text="Détails du contrat ou engagement") }}
+        </div>
+
+        <!-- Montants -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Montants</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{ form_field(form.amount, label="Montant engagé (€)", type="number", placeholder="50000", required=true) }}
+                {{ form_field(form.budget_line_id, label="Ligne budgétaire") }}
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Dates et statuts</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{ form_field(form.start_date, label="Date de début", type="date", required=true) }}
+                {{ form_field(form.end_date, label="Date de fin", type="date") }}
+                {{ form_field(form.status, label="Statut") }}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 pt-6 border-t border-slate-200">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save mr-2"></i>
+                {% if form.id.data %}Mettre à jour{% else %}Créer{% endif %}
+            </button>
+            <a href="{{ url_for('engagements.list_engagements') }}" class="btn-secondary">
+                <i class="fas fa-times mr-2"></i>Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

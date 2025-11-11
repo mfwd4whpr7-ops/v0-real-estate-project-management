@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Budgets - ProBuild{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">Gestion des Budgets</h1>
+            <p class="text-slate-600 mt-2">Suivi détaillé de vos budgets par projet</p>
+        </div>
+        <a href="{{ url_for('budget.add_budget') }}" class="mt-4 md:mt-0 btn-primary inline-flex items-center justify-center">
+            <i class="fas fa-plus mr-2"></i>Ajouter un budget
+        </a>
+    </div>
+
+    <!-- Budget Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm font-medium">Budget Total</p>
+            <p class="text-3xl font-bold text-slate-900 mt-2">{{ total_budget|default('250 000') }} €</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm font-medium">Total Dépensé</p>
+            <p class="text-3xl font-bold text-slate-900 mt-2">{{ total_spent|default('87 500') }} €</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-slate-600 text-sm font-medium">Reste Disponible</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">{{ remaining|default('162 500') }} €</p>
+        </div>
+    </div>
+
+    <!-- Budget Lines Table -->
+    <div class="card overflow-hidden">
+        <div class="p-6 border-b border-slate-200">
+            <h2 class="text-lg font-semibold text-slate-900">Détail des budgets</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Ligne Budgétaire</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Budget Alloué</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Dépensé</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Engagement</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Disponible</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Utilisation</th>
+                        <th class="text-left py-3 px-6 text-sm font-semibold text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for line in budget_lines %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-6 text-sm font-medium text-slate-900">{{ line.name }}</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ line.amount|default(0) }} €</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ line.spent|default(0) }} €</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ line.engagement|default(0) }} €</td>
+                        <td class="py-3 px-6 text-sm text-slate-600">{{ line.available|default(0) }} €</td>
+                        <td class="py-3 px-6">
+                            <div class="w-24 bg-slate-200 rounded-full h-2">
+                                <div class="bg-orange-500 h-2 rounded-full" style="width: {{ line.percentage|default(0) }}%"></div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-6">
+                            <button class="text-orange-600 hover:text-orange-700 text-sm">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

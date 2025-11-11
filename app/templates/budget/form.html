@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "components/form-field.html" import form_field %}
+
+{% block title %}{% if form.id.data %}Éditer{% else %}Ajouter{% endif %} une ligne budgétaire - ProBuild{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900">
+            {% if form.id.data %}Éditer une ligne{% else %}Ajouter une ligne budgétaire{% endif %}
+        </h1>
+        <p class="text-slate-600 mt-2">Gestion des postes budgétaires</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="card p-8">
+        {{ form.csrf_token }}
+        
+        <!-- Sélection du projet -->
+        <div class="mb-6">
+            {{ form_field(form.project_id, label="Projet", required=true, help_text="Sélectionnez le projet concerné") }}
+        </div>
+
+        <!-- Nomenclature -->
+        <div class="mb-6">
+            {{ form_field(form.budget_nomenclature_id, label="Nomenclature budgétaire", required=true, help_text="Sélectionnez la catégorie budgétaire") }}
+        </div>
+
+        <!-- Montant -->
+        <div class="mb-6">
+            {{ form_field(form.amount, label="Montant alloué (€)", type="number", placeholder="50000", required=true) }}
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+            {{ form_field(form.description, label="Description", type="textarea", help_text="Détails sur cette ligne budgétaire") }}
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 pt-6 border-t border-slate-200">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save mr-2"></i>
+                {% if form.id.data %}Mettre à jour{% else %}Ajouter{% endif %}
+            </button>
+            <a href="{{ url_for('budget.list_budgets') }}" class="btn-secondary">
+                <i class="fas fa-times mr-2"></i>Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

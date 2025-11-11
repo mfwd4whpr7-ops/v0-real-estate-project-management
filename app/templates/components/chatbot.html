@@ -1,0 +1,155 @@
+<!-- Chatbot Widget - À inclure dans base.html avant </body> -->
+<div id="chatbot-widget" class="fixed bottom-6 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-slate-200 flex flex-col hidden z-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-robot text-xl"></i>
+            <h3 class="font-semibold">ProAssistant</h3>
+        </div>
+        <button id="chatbot-close" class="p-1 hover:bg-orange-700 rounded transition">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Messages Container -->
+    <div id="chatbot-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+        <div class="flex justify-start">
+            <div class="bg-white rounded-lg p-3 max-w-xs shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-700">Bonjour! Je suis ProAssistant. Comment puis-je vous aider avec vos projets immobiliers?</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input -->
+    <div class="border-t border-slate-200 p-4 bg-white rounded-b-lg">
+        <div class="flex gap-2">
+            <input type="text" id="chatbot-input" placeholder="Votre message..." 
+                   class="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm">
+            <button id="chatbot-send" class="btn-primary px-3 py-2">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Chat Button -->
+<button id="chatbot-toggle" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition flex items-center justify-center z-40">
+    <i class="fas fa-robot text-2xl"></i>
+</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('chatbot-toggle');
+    const widget = document.getElementById('chatbot-widget');
+    const closeBtn = document.getElementById('chatbot-close');
+    const sendBtn = document.getElementById('chatbot-send');
+    const input = document.getElementById('chatbot-input');
+    const messagesContainer = document.getElementById('chatbot-messages');
+    
+    let isOpen = false;
+    
+    // Toggle chatbot
+    toggle.addEventListener('click', function() {
+        isOpen = !isOpen;
+        widget.classList.toggle('hidden');
+        toggle.classList.toggle('hidden', isOpen);
+        if (isOpen) input.focus();
+    });
+    
+    // Close chatbot
+    closeBtn.addEventListener('click', function() {
+        isOpen = false;
+        widget.classList.add('hidden');
+        toggle.classList.remove('hidden');
+    });
+    
+    // Send message
+    async function sendMessage() {
+        const message = input.value.trim();
+        if (!message) return;
+        
+        // Add user message to UI
+        const userDiv = document.createElement('div');
+        userDiv.className = 'flex justify-end';
+        userDiv.innerHTML = `
+            <div class="bg-orange-500 text-white rounded-lg p-3 max-w-xs shadow-sm">
+                <p class="text-sm">${escapeHtml(message)}</p>
+            </div>
+        `;
+        messagesContainer.appendChild(userDiv);
+        
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Show loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'flex justify-start';
+        loadingDiv.innerHTML = `
+            <div class="bg-white rounded-lg p-3 max-w-xs shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-700">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    Réflexion en cours...
+                </p>
+            </div>
+        `;
+        messagesContainer.appendChild(loadingDiv);
+        
+        try {
+            const response = await fetch('{{ url_for("chatbot.chat") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            if (!response.ok) throw new Error('Erreur serveur');
+            
+            const data = await response.json();
+            
+            // Remove loading
+            loadingDiv.remove();
+            
+            // Add assistant response
+            const assistantDiv = document.createElement('div');
+            assistantDiv.className = 'flex justify-start';
+            assistantDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-3 max-w-xs shadow-sm border border-slate-200">
+                    <p class="text-sm text-slate-700">${escapeHtml(data.message)}</p>
+                </div>
+            `;
+            messagesContainer.appendChild(assistantDiv);
+        } catch (error) {
+            loadingDiv.remove();
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'flex justify-start';
+            errorDiv.innerHTML = `
+                <div class="bg-red-50 rounded-lg p-3 max-w-xs shadow-sm border border-red-200">
+                    <p class="text-sm text-red-700">Erreur: Impossible de contacter l'assistant.</p>
+                </div>
+            `;
+            messagesContainer.appendChild(errorDiv);
+        }
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    // Utility function
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+});
+</script>

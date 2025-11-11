@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "components/form-field.html" import form_field %}
+
+{% block title %}{% if form.id.data %}Éditer{% else %}Créer{% endif %} un projet - ProBuild{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900">
+            {% if form.id.data %}Éditer le projet{% else %}Créer un nouveau projet{% endif %}
+        </h1>
+        <p class="text-slate-600 mt-2">Remplissez les informations du projet</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="card p-8">
+        {{ form.csrf_token }}
+        
+        <!-- Informations générales -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Informations générales</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{ form_field(form.name, label="Nom du projet", placeholder="Ex: Résidence Les Pins", required=true) }}
+                {{ form_field(form.location, label="Localisation", placeholder="Ex: Île de France", required=true) }}
+            </div>
+            
+            {{ form_field(form.description, label="Description", type="textarea", help_text="Décrivez les objectifs et particularités du projet") }}
+        </div>
+
+        <!-- Détails du projet -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Détails du projet</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{ form_field(form.project_type, label="Type de projet") }}
+                {{ form_field(form.status, label="Statut") }}
+                {{ form_field(form.budget, label="Budget estimé (€)", type="number", placeholder="250000") }}
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Planning</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{ form_field(form.start_date, label="Date de démarrage", type="date", required=true) }}
+                {{ form_field(form.end_date, label="Date de fin prévue", type="date", required=true) }}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 pt-6 border-t border-slate-200">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save mr-2"></i>
+                {% if form.id.data %}Mettre à jour{% else %}Créer{% endif %}
+            </button>
+            <a href="{{ url_for('projects.list_projects') }}" class="btn-secondary">
+                <i class="fas fa-times mr-2"></i>Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
